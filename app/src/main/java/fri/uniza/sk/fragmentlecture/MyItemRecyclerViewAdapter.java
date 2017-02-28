@@ -19,7 +19,12 @@ import java.util.List;
 public class MyItemRecyclerViewAdapter extends RecyclerView.Adapter<MyItemRecyclerViewAdapter.ViewHolder> {
 
     private final List<DummyItem> mValues;
+
     private final OnListFragmentInteractionListener mListener;
+
+    public List<DummyItem> getmValues() {
+        return mValues;
+    }
 
     public MyItemRecyclerViewAdapter(List<DummyItem> items, OnListFragmentInteractionListener listener) {
         mValues = items;

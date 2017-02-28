@@ -1,6 +1,7 @@
 package fri.uniza.sk.fragmentlecture;
 
 
+import android.content.Context;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
@@ -17,16 +18,6 @@ import android.widget.TextView;
 public class BottomFragment extends Fragment {
     private ButtonClicks buttonClicks;
 
-    public static BottomFragment newInstance(int count, ButtonClicks mButtonClicks) {
-
-        Bundle args = new Bundle();
-        args.putInt("count", count);
-        args.putParcelable("callback", mButtonClicks);
-        BottomFragment fragment = new BottomFragment();
-        fragment.setArguments(args);
-        return fragment;
-    }
-
     public void setButtonClicks(ButtonClicks buttonClicks) {
         this.buttonClicks = buttonClicks;
     }
@@ -40,6 +31,16 @@ public class BottomFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_bottom, container, false);
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        try {
+            buttonClicks = (ButtonClicks) context;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(context.toString() + " must implement OnArticleSelectedListener");
+        }
 
     }
 
@@ -47,11 +48,6 @@ public class BottomFragment extends Fragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        if (getArguments() != null) {
-
-            ((TextView) view.findViewById(R.id.numView)).setText(String.valueOf(getArguments().getInt("count")));
-            buttonClicks = (ButtonClicks) getArguments().getParcelable("callback");
-        }
         view.findViewById(R.id.addBtn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -66,7 +62,7 @@ public class BottomFragment extends Fragment {
         });
     }
 
-    public interface ButtonClicks extends Parcelable {
+    public interface ButtonClicks {
         void addButtonClick();
 
         void deleteButtonClick();

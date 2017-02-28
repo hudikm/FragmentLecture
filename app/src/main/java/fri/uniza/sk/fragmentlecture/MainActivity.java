@@ -9,44 +9,28 @@ import android.util.Log;
 import android.widget.Toast;
 
 import java.lang.ref.WeakReference;
+import java.util.List;
 
 import fri.uniza.sk.fragmentlecture.dummy.DummyContent;
 
-public class MainActivity extends AppCompatActivity implements ItemFragment.OnListFragmentInteractionListener {
+public class MainActivity extends AppCompatActivity implements ItemFragment.OnListFragmentInteractionListener, BottomFragment.ButtonClicks {
 
     private int i = 0;
-
-    private static WeakReference<MainActivity> wrActivity = null;
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        outState.putChar("test", 's');
-        super.onSaveInstanceState(outState);
-
-    }
+    private ItemFragment itemFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         this.setTitle("Main activity");
-        wrActivity =  new WeakReference<MainActivity>(this);
 
-        ItemFragment itemFragment = ItemFragment.newInstance(1);
+        itemFragment = ItemFragment.newInstance(1);
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-        fragmentTransaction.add(R.id.fragmentTop, itemFragment);
+        fragmentTransaction.replace(R.id.fragmentTop, itemFragment);
 
-        if (savedInstanceState != null) {
-            //getSupportFragmentManager().popBackStack();
-            Log.d("Test", "popbackstack");
-        } else {
-
-            BottomFragment bottomFragment = BottomFragment.newInstance(i++, new ButtonClicksImpl(i));
-            fragmentTransaction.replace(R.id.fragmentBottom, bottomFragment);
-            fragmentTransaction.addToBackStack(null);
-            fragmentTransaction.commit();
-        }
-
+        BottomFragment bottomFragment = new BottomFragment();
+        fragmentTransaction.replace(R.id.fragmentBottom, bottomFragment);
+        fragmentTransaction.commit();
 
     }
 
@@ -56,57 +40,23 @@ public class MainActivity extends AppCompatActivity implements ItemFragment.OnLi
 
     }
 
-    private class ButtonClicksImpl implements BottomFragment.ButtonClicks {
+    @Override
+    public void addButtonClick() {
+        Toast.makeText(MainActivity.this, "Add clicked", Toast.LENGTH_SHORT).show();
+        ((MyItemRecyclerViewAdapter) itemFragment.getRecyclerView().getAdapter()).getmValues().add(new DummyContent.DummyItem("1", "Test", "Details"));
+        itemFragment.getRecyclerView().getAdapter().notifyDataSetChanged();
+    }
 
-        int i;
-        @Override
-        public void addButtonClick() {
-            //Toast.makeText(MainActivity.this,"Add clicked",Toast.LENGTH_SHORT).show();
-            final MainActivity activity = wrActivity.get();
-            BottomFragment bottomFragment = BottomFragment.newInstance(i++, new ButtonClicksImpl(i));
-            FragmentTransaction fragmentTransaction = activity.getSupportFragmentManager().beginTransaction();
-            fragmentTransaction.replace(R.id.fragmentBottom, bottomFragment);
-            fragmentTransaction.addToBackStack(null);
-            fragmentTransaction.commit();
+    @Override
+    public void deleteButtonClick() {
+        Toast.makeText(getApplicationContext(), "Del clicked", Toast.LENGTH_SHORT).show();
 
+        List<DummyContent.DummyItem> dummyItems = ((MyItemRecyclerViewAdapter) itemFragment.getRecyclerView().getAdapter()).getmValues();
+        if (dummyItems.size() > 0) {
+            dummyItems.remove(dummyItems.size() - 1);
+            itemFragment.getRecyclerView().getAdapter().notifyDataSetChanged();
         }
 
-        @Override
-        public void deleteButtonClick() {
-            Toast.makeText(getApplicationContext(), "Del clicked", Toast.LENGTH_SHORT).show();
 
-        }
-
-        public ButtonClicksImpl(int i) {
-
-            this.i = i;
-        }
-
-        protected ButtonClicksImpl(Parcel in) {
-            i = in.readInt();
-        }
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        @Override
-        public void writeToParcel(Parcel dest, int flags) {
-            dest.writeInt(i);
-        }
-
-        @SuppressWarnings("unused")
-        public final Parcelable.Creator<ButtonClicksImpl> CREATOR = new Parcelable.Creator<ButtonClicksImpl>() {
-            @Override
-            public ButtonClicksImpl createFromParcel(Parcel in) {
-                return new ButtonClicksImpl(in);
-            }
-
-            @Override
-            public ButtonClicksImpl[] newArray(int size) {
-                return new ButtonClicksImpl[size];
-            }
-        };
     }
 }
